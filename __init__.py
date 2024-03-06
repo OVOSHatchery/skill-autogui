@@ -15,23 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
-from adapt.intent import IntentBuilder
-
-from mycroft.skills.core import MycroftSkill
-from mycroft.util.log import getLogger
+import platform
 
 import pyautogui
-import platform
 from num2words import num2words
+from ovos_workshop.intents import IntentBuilder
+from ovos_workshop.skills import OVOSSkill
 
 __author__ = 'eClarity'
 
-LOGGER = getLogger(__name__)
 
-
-class AutoguiSkill(MycroftSkill):
-    def __init__(self):
-        super(AutoguiSkill, self).__init__(name="AutoguiSkill")
+class AutoguiSkill(OVOSSkill):
 
     def initialize(self):
         type_intent = IntentBuilder("TypeIntent"). \
@@ -40,19 +34,23 @@ class AutoguiSkill(MycroftSkill):
 
         mouse_absolute_intent = IntentBuilder("MouseAbsoluteIntent"). \
             require("MouseAbsoluteKeyword").require("X").require("Y").build()
-        self.register_intent(mouse_absolute_intent, self.handle_mouse_absolute_intent)
+        self.register_intent(mouse_absolute_intent,
+                             self.handle_mouse_absolute_intent)
 
         mouse_scroll_down_intent = IntentBuilder("MouseScrollDownIntent"). \
             require("MouseScrollDownKeyword").require("Scroll").build()
-        self.register_intent(mouse_scroll_down_intent, self.handle_mouse_scroll_down_intent)
+        self.register_intent(mouse_scroll_down_intent,
+                             self.handle_mouse_scroll_down_intent)
 
         mouse_scroll_up_intent = IntentBuilder("MouseScrollUpIntent"). \
             require("MouseScrollUpKeyword").require("Scroll").build()
-        self.register_intent(mouse_scroll_up_intent, self.handle_mouse_scroll_up_intent)
+        self.register_intent(mouse_scroll_up_intent,
+                             self.handle_mouse_scroll_up_intent)
 
         mouse_scroll_right_intent = IntentBuilder("MouseScrollRightIntent"). \
             require("MouseScrollRightKeyword").require("Scroll").build()
-        self.register_intent(mouse_scroll_right_intent, self.handle_mouse_scroll_right_intent)
+        self.register_intent(mouse_scroll_right_intent,
+                             self.handle_mouse_scroll_right_intent)
 
         screen_res_intent = IntentBuilder("ScreenResIntent"). \
             require("ScreenResKeyword").build()
@@ -68,15 +66,16 @@ class AutoguiSkill(MycroftSkill):
 
         release_key_intent = IntentBuilder("ReleaseKeyIntent"). \
             require("ReleaseKeyKeyword").require("Key").build()
-        self.register_intent(release_key_intent, self.handle_release_key_intent)
+        self.register_intent(release_key_intent,
+                             self.handle_release_key_intent)
 
         select_combination_intent = IntentBuilder("SelectCombinationIntent"). \
             require("SelectAllKeyword").optionally("CopyKeyword"). \
-                                        optionally("CutKeyword"). \
-                                        optionally("PasteKeyword").\
-                                        optionally("DeleteKeyword").build()
-        self.register_intent(select_combination_intent, self.handle_select_combination_intent)
-
+            optionally("CutKeyword"). \
+            optionally("PasteKeyword"). \
+            optionally("DeleteKeyword").build()
+        self.register_intent(select_combination_intent,
+                             self.handle_select_combination_intent)
 
         copy_intent = IntentBuilder("CopyIntent"). \
             require("CopyKeyword").build()
@@ -91,36 +90,39 @@ class AutoguiSkill(MycroftSkill):
         self.register_intent(paste_intent, self.handle_paste_intent)
 
     def handle_type_intent(self, message):
-	self.speak_dialog("typing")
-	text = message.data.get('Text')
+        self.speak_dialog("typing")
+        text = message.data.get('Text')
         pyautogui.typewrite(text, interval=0.05)
 
     def handle_mouse_absolute_intent(self, message):
-	self.speak('moving mouse now')
-	#X = message.data.get('X')
-	#Y = message.data.get('Y')
-        #pyautogui.moveTo(X, Y)
+        self.speak('moving mouse now')
+        # TODO
+        # X = message.data.get('X')
+        # Y = message.data.get('Y')
+        # pyautogui.moveTo(X, Y)
 
     def handle_mouse_scroll_down_intent(self, message):
         self.speak('scrolling down now')
         scroll = message.data.get('Scroll')
         scroll_down = int(scroll) * -1
-	pyautogui.scroll(scroll_down)
+        pyautogui.scroll(scroll_down)
 
     def handle_mouse_scroll_up_intent(self, message):
         self.speak('scrolling up now')
         scroll = message.data.get('Scroll')
         scroll_up = int(scroll)
-	pyautogui.scroll(scroll_up)
+        pyautogui.scroll(scroll_up)
 
     def handle_mouse_scroll_right_intent(self, message):
         if platform.system().lower().startswith('lin'):
             self.speak('scrolling right now')
             scroll = message.data.get('Scroll')
             scroll_right = int(scroll)
-	    pyautogui.hscroll(scroll_right)
+            pyautogui.hscroll(scroll_right)
         else:
-            self.speak('Sorry, I cannot scroll right on your current operating system')
+            self.speak(
+                'Sorry, I cannot scroll right on your current operating system'
+            )
 
     def handle_screen_res_intent(self, message):
         screen = pyautogui.size()
@@ -128,7 +130,8 @@ class AutoguiSkill(MycroftSkill):
         resy = screen[1]
         responsex = num2words(resx)
         responsey = num2words(resy)
-        self.speak("Your screen resolution is %s by %s" % (responsex, responsey))
+        self.speak("Your screen resolution is %s by %s" %
+                   (responsex, responsey))
 
     def handle_press_key_intent(self, message):
         key = message.data.get('Key')
@@ -171,11 +174,3 @@ class AutoguiSkill(MycroftSkill):
             self.speak("deleting")
             pyautogui.keyDown("delete")
             pyautogui.keyUp("delete")
-            
-
-    def stop(self):
-        pass
-
-
-def create_skill():
-    return AutoguiSkill()
